@@ -1,6 +1,7 @@
 version: '3'
 services:
   db:
+    build: ./docker-files/db
     image: psqlmoviesetup:latest
     networks: 
         - movienet
