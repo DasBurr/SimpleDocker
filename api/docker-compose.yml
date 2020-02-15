@@ -1,5 +1,13 @@
 version: '3'
 services:
+  api:
+    build: ./
+    image: movieapi:latest
+    ports:
+      - "8080:8080"
+      - "443:443"
+    networks:
+      -movienet
   mdb:
     build: ./docker-files/db
     image: psqlmoviesetup:latest
