@@ -1,3 +1,5 @@
+using api.Classes;
+using api.Interfaces;
 using Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,6 +22,7 @@ namespace api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IGetMovie, GetMovies>();
             services.AddDbContext<MovieContext>(options =>
             options.UseNpgsql(Configuration.GetConnectionString("MoviesDb")));
             services.AddControllers();
