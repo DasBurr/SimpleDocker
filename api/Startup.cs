@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis.Extensions.Core.Configuration;
 
 namespace api
 {
@@ -22,6 +23,9 @@ namespace api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>();
+            services.AddSingleton(redisConfig);
+
             services.AddScoped<IGetMovie, GetMovies>();
             services.AddDbContext<MovieContext>(options =>
             options.UseNpgsql(Configuration.GetConnectionString("MoviesDb")));
