@@ -1,4 +1,5 @@
 using api.Classes;
+using api.Helpers;
 using api.Interfaces;
 using Database;
 using Microsoft.AspNetCore.Builder;
@@ -7,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using StackExchange.Redis.Extensions.Core.Configuration;
 
 namespace api
 {
@@ -23,9 +23,14 @@ namespace api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>();
-            services.AddSingleton(redisConfig);
+            services.AddDistributedRedisCache(option =>
+            {
+                option.Configuration = "127.0.0.1";
+                option.InstanceName = "redis";
+            });
 
+            services.AddScoped<ISetRedisCache, RedisCache>();
+            services.AddScoped<IGetRedisCache, RedisCache>();
             services.AddScoped<IGetMovie, GetMovies>();
             services.AddDbContext<MovieContext>(options =>
             options.UseNpgsql(Configuration.GetConnectionString("MoviesDb")));

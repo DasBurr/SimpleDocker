@@ -1,8 +1,8 @@
 ﻿using api.Interfaces;
 using Database;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis.Extensions.Core.Abstractions;
 using System.Collections.Generic;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace api.Controllers
 {
@@ -11,18 +11,29 @@ namespace api.Controllers
     public class MovieController : ControllerBase
     {
         private readonly IGetMovie getMovie;
-        private readonly IRedisCacheClient redis;
+        private readonly IGetRedisCache redisCacheGet;
+        private readonly ISetRedisCache redisCacheSet;
 
-        public MovieController(IGetMovie getMovie, IRedisCacheClient redis)
+
+        public MovieController(IGetMovie getMovie, IGetRedisCache redisCache, ISetRedisCache redisCacheSet)
         {
             this.getMovie = getMovie;
-            this.redis = redis;
+            this.redisCacheGet = redisCache;
+            this.redisCacheSet = redisCacheSet;
         }
 
         [HttpGet("{title}")]
-        public IEnumerable<Movies> Get(string title) { 
+        public IEnumerable<Movies> Get(string title)
+        {
+            var movies = redisCacheGet.Get<Movies>(title).Result;
 
-            return this.getMovie.GetMovies(title); 
+            if (movies.Count == 0)
+            {
+                movies = this.getMovie.GetMovies(title);
+                this.redisCacheSet.Set(title, movies);
+            }
+
+            return movies;
         }
 
     }
